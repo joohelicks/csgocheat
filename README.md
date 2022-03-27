@@ -5,4 +5,4 @@ compile with:
   g++ main.cpp -o csgocheat
  
 run with:
-  sudo ./csgocheat `pidof csgo_linux64`
+  ```sudo ./csgocheat pidof `csgo_linux64` ```
