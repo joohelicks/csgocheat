@@ -1,11 +1,11 @@
 # csgocheat
 CSGO cheats made for educational purposes. Works on Linux only.
 
-# Features:
+## Features:
   -bunnyhop
   -no flash
 
-# compilation and running
+## compilation and running
 
 compile with:
   ```g++ -lX11 main.cpp -o csgocheat```
