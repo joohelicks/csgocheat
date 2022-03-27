@@ -12,4 +12,4 @@ compile with:
   ```g++ -lX11 main.cpp -o csgocheat```
  
 run with:
-  ```sudo ./csgocheat pidof csgo_linux64` ```
+  ```sudo ./csgocheat `pidof csgo_linux64` ```
