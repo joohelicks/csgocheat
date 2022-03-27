@@ -114,7 +114,8 @@ void disable_flashbang(pid_t pid, offsets offsets) {
 
 int main(int argc, char **argv) {
 	pid_t pid;
-	int flags;
+	int flags=0;
+	bool bhop = false;
 	offsets offsets; 
 
 	Display *dpy =XOpenDisplay(0);
@@ -142,18 +143,20 @@ int main(int argc, char **argv) {
 	XSelectInput(dpy, root, KeyPressMask);
 
 	offsets.client_clientaddr = parsemaps(pid);
-	uintptr_t playeraddr = 0;
+	if (offsets.client_clientaddr == -1) {
+		std::cout << "Unable to parse /proc/" << pid << "/maps" << std::endl;
+		XCloseDisplay(dpy);
+		return 0;
+	}
 
+	uintptr_t playeraddr = 0;
 	while (playeraddr == 0) {
 		sleep(1);
 		read_memory(pid, (void*)(offsets.client_clientaddr+dwLocalPlayer), &playeraddr, sizeof(playeraddr));
 	}
 
 	offsets.playerptr = *(&playeraddr);
-	flags=0;
-
-	bool bhop = false;
-
+	
 	while (true) {
 		disable_flashbang(pid, offsets);
 		
