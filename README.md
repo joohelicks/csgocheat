@@ -3,6 +3,7 @@ CSGO cheats made for educational purposes. Works on Linux only.
 
 ## Features:
   -bunnyhop
+  
   -no flash
 
 ## compilation and running
