@@ -121,10 +121,10 @@ int main(int argc, char **argv) {
 	Window root = DefaultRootWindow(dpy);
 	XEvent ev;
 	int             keycode         = XKeysymToKeycode(dpy,XK_F1);
-    Window          grab_window     = root;
-    Bool            owner_events    = False;
-    int             pointer_mode    = GrabModeAsync;
-    int             keyboard_mode   = GrabModeAsync;
+	Window          grab_window     = root;
+	Bool            owner_events    = False;
+	int             pointer_mode    = GrabModeAsync;
+	int             keyboard_mode   = GrabModeAsync;
 
 	if (argc < 2) {
 		std::cout << "usage: " << argv[0] << " <pid>" << std::endl;
