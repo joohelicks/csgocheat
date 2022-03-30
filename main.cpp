@@ -13,7 +13,7 @@
 
 typedef struct offsets {
 	uintptr_t playerptr;
-	uintptr_t client_clientaddr;
+	uintptr_t moduleaddr;
 } offsets;
 
 void write_memory(pid_t pid, void* dst, void* src, size_t size)
@@ -85,13 +85,15 @@ constexpr uintptr_t dwForceJump = 0x2b86b50;
 void bunnyhop(pid_t pid, offsets offsets) {
 	int zero = 0;
 	int bunnyhop = 6;
-	write_memory(pid, (void*)(offsets.client_clientaddr + dwForceJump), &bunnyhop, sizeof(bunnyhop));
+	write_memory(pid, (void*)(offsets.moduleaddr + dwForceJump), &bunnyhop, sizeof(bunnyhop));
 	usleep(100);
-	write_memory(pid, (void*)(offsets.client_clientaddr + dwForceJump), &zero, sizeof(zero));
+	write_memory(pid, (void*)(offsets.moduleaddr + dwForceJump), &zero, sizeof(zero));
 
 }
 
-bool should_bunnyhop(offsets offsets, int bhop, int flags) {
+bool should_bunnyhop(int pid, offsets offsets, int bhop) {
+	int flags = 0;
+	read_memory(pid, (void*)(offsets.playerptr + m_fFlags), &flags, sizeof(flags));
 	if (flags & (1 << 0) && bhop == true) {
 		return true;
 	}
@@ -114,7 +116,6 @@ void disable_flashbang(pid_t pid, offsets offsets) {
 
 int main(int argc, char **argv) {
 	pid_t pid;
-	int flags=0;
 	bool bhop = false;
 	offsets offsets; 
 
@@ -142,8 +143,8 @@ int main(int argc, char **argv) {
 			keyboard_mode);
 	XSelectInput(dpy, root, KeyPressMask);
 
-	offsets.client_clientaddr = parsemaps(pid);
-	if (offsets.client_clientaddr == -1) {
+	offsets.moduleaddr = parsemaps(pid);
+	if (offsets.moduleaddr == -1) {
 		std::cout << "Unable to parse /proc/" << pid << "/maps" << std::endl;
 		XCloseDisplay(dpy);
 		return 0;
@@ -152,7 +153,7 @@ int main(int argc, char **argv) {
 	uintptr_t playeraddr = 0;
 	while (playeraddr == 0) {
 		sleep(1);
-		read_memory(pid, (void*)(offsets.client_clientaddr+dwLocalPlayer), &playeraddr, sizeof(playeraddr));
+		read_memory(pid, (void*)(offsets.moduleaddr+dwLocalPlayer), &playeraddr, sizeof(playeraddr));
 	}
 
 	offsets.playerptr = *(&playeraddr);
@@ -160,12 +161,10 @@ int main(int argc, char **argv) {
 	while (true) {
 		disable_flashbang(pid, offsets);
 		
-		read_memory(pid, (void*)(offsets.playerptr + m_fFlags), &flags, sizeof(flags));
-
 		if (XCheckWindowEvent(dpy, root, KeyPressMask, &ev))
 			bhop = !bhop;
 
-		if (should_bunnyhop(offsets, bhop, flags))
+		if (should_bunnyhop(pid, offsets, bhop))
 			bunnyhop(pid, offsets);
 	}
 	XCloseDisplay(dpy);
